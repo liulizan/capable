@@ -1,0 +1,19 @@
+{
+  "name": "capable",
+  "version": "1.0.0",
+  "description": "Capable（可培）— AI 驱动的内容转化引擎，将文章/笔记转化为可练习的个人能力",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "iconv-lite": "^0.7.2",
+    "mammoth": "^1.12.0",
+    "multer": "^2.1.1",
+    "xlsx": "^0.18.5"
+  }
+}

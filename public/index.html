@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Capable（可培）— AI 能力转化教练</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Toast 通知容器 -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- ========== 头部 ========== -->
+  <header class="header">
+    <div class="container header-inner">
+      <div class="header-text">
+        <div class="brand-row">
+          <span class="logo-icon">🧠</span>
+          <div class="brand-title">
+            <span class="brand-name">Capable</span>
+            <span class="brand-sub">可培 · 能力转化引擎</span>
+          </div>
+        </div>
+        <p class="tagline">把好内容，变成你的真本事 <span class="tech-badge">离线本地分析引擎 · 结构化刻意练习工具</span></p>
+        <div class="quick-tags">
+          <button class="quick-tag" data-preset="文档解析">📄 文档解析</button>
+          <button class="quick-tag" data-preset="书本精读">📖 书本精读</button>
+          <button class="quick-tag" data-preset="课程刷题">📝 课程刷题</button>
+          <button class="quick-tag" data-preset="报告复盘">📊 报告复盘</button>
+          <button class="quick-tag" data-preset="播客转练">🎙️ 播客转练</button>
+        </div>
+      </div>
+      <button type="button" id="btnTheme" class="btn-theme" title="切换主题">
+        <span class="theme-icon">🌙</span>
+        <span class="theme-label">深色模式</span>
+      </button>
+      <button type="button" id="btnHistory" class="btn-header" title="历史记录">📋 历史</button>
+      <button type="button" id="btnFavorites" class="btn-header" title="我的收藏">⭐ 收藏</button>
+    </div>
+  </header>
+
+  <!-- 历史记录侧边栏 -->
+  <div id="historyPanel" class="history-panel hidden">
+    <div class="history-header">
+      <h3>📋 历史记录</h3>
+      <button id="btnCloseHistory" class="history-close">✕</button>
+    </div>
+    <div class="history-search">
+      <input type="text" id="historySearch" placeholder="🔍 搜索历史…">
+    </div>
+    <div id="historyList" class="history-list"></div>
+    <div class="history-footer">
+      <button id="btnClearHistory" class="btn-clear">🗑️ 清空全部</button>
+    </div>
+  </div>
+
+  <!-- ========== 主布局 ========== -->
+  <main class="container main-layout">
+
+    <!-- ===== 左侧：配置面板 ===== -->
+    <section class="panel panel-input">
+
+      <!-- 👤 角色配置 -->
+      <details class="panel-group" open>
+        <summary><span class="panel-icon">👤</span> 角色配置 <span class="hint-badge">可选</span><span class="help-tip" title="选定岗位后 AI 按角色视角筛选内容。自定义角色可固化 prompt，重复解析同类型内容。">?</span></summary>
+        <div class="panel-group-body">
+          <select id="identityPreset">
+            <option value="" disabled selected>请选择目标角色</option>
+            <optgroup label="📂 通用角色">
+              <option value="在校生">🎓 在校生</option>
+              <option value="自媒体">📹 自媒体</option>
+              <option value="开发者">💻 开发者</option>
+              <option value="设计师">🎨 设计师</option>
+            </optgroup>
+            <optgroup label="💼 职场复盘">
+              <option value="产品经理">📱 产品经理</option>
+              <option value="创业者">🚀 创业者</option>
+            </optgroup>
+            <optgroup label="📚 读书备考">
+              <option value="公考备考">📝 公考备考</option>
+              <option value="教师">📚 教师</option>
+            </optgroup>
+            <optgroup label="🏭 行业专项">
+              <option value="__custom__">✏️ 自定义…</option>
+            </optgroup>
+          </select>
+          <input type="text" id="userProfile" class="hidden" placeholder="输入你的身份/角色…">
+          <div class="role-actions">
+            <button class="mini-btn" id="btnNewRole">＋ 新建自定义角色</button>
+            <button class="mini-btn" id="btnImportPrompt">📥 导入角色 Prompt</button>
+          </div>
+          <p class="role-hint">💡 推荐：粘贴专属行业 prompt，定制专属内容提炼规则</p>
+        </div>
+      </details>
+
+      <!-- 🎯 输出格式 -->
+      <details class="panel-group" open>
+        <summary><span class="panel-icon">🎯</span> 输出格式 <span class="hint">（可多选）</span><span class="mode-count" id="modeCount">已选 1/4</span></summary>
+        <div class="panel-group-body">
+          <div class="mode-actions">
+            <button class="mini-btn" id="btnSelectAll">全选</button>
+            <button class="mini-btn" id="btnClearAll">清空已选</button>
+          </div>
+          <div class="mode-selector" id="modeSelector">
+            <!-- 分组①：内容梳理 -->
+            <div class="mode-group-label"><span>📑</span> 内容梳理 <span class="mode-group-count" data-group="review">已选 0/2</span></div>
+            <label class="mode-card" data-mode="summarize" data-group="review">
+              <input type="checkbox" name="mode" value="summarize"><span class="mode-card-icon-big">📋</span><span class="mode-card-title">总结重点</span><span class="mode-card-desc">提取论点，结构化分段摘要</span><span class="mode-card-tag">快速精读文档</span>
+            </label>
+            <label class="mode-card" data-mode="extract" data-group="review">
+              <input type="checkbox" name="mode" value="extract"><span class="mode-card-icon-big">🔍</span><span class="mode-card-title">提取信息</span><span class="mode-card-desc">识别价格/日期/数据等关键字段</span><span class="mode-card-tag">批量扒取参数表格</span>
+            </label>
+            <div class="mode-group-divider"></div>
+            <!-- 分组②：深度学习 -->
+            <div class="mode-group-label"><span>🧠</span> 深度学习 <span class="mode-group-count" data-group="deep">已选 1/2</span></div>
+            <label class="mode-card" data-mode="critique" data-group="deep">
+              <input type="checkbox" name="mode" value="critique"><span class="mode-card-icon-big">💬</span><span class="mode-card-title">批判分析</span><span class="mode-card-desc">审视论证逻辑，查漏洞与反方视角</span><span class="mode-card-tag">竞品复盘查漏</span>
+            </label>
+            <label class="mode-card" data-mode="capability" data-group="deep">
+              <input type="checkbox" name="mode" value="capability" checked><span class="mode-card-icon-big">🧠</span><span class="mode-card-title">生成练习卡片</span><span class="mode-card-desc">拆解原文为卡片+自测题+演练</span><span class="mode-card-tag">考点自测刷题</span>
+            </label>
+          </div>
+          <button class="mini-btn add-template-btn" id="btnAddTemplate">＋ 自定义输出模板</button>
+        </div>
+      </details>
+
+      <!-- 📂 数据源 -->
+      <details class="panel-group" open>
+        <summary><span class="panel-icon">📂</span> 数据源 <span class="hint">（链接 / 文件，与文本输入二选一）</span></summary>
+        <div class="panel-group-body">
+          <!-- 链接抓取 -->
+          <div class="url-input-row">
+            <input type="url" id="urlInput" placeholder="粘贴链接提取文案（B站 / 知乎 / 公众号…）">
+            <button type="button" id="btnFetchUrl" class="btn-fetch" disabled><span class="btn-fetch-text">抓取</span><span class="spinner hidden"></span></button>
+          </div>
+          <div id="urlStatus" class="file-status hidden"></div>
+
+          <!-- 双栏：文件上传 + 剪贴板 -->
+          <div class="source-split">
+            <div class="source-left">
+              <div id="dropZone" class="drop-zone">
+                <input type="file" id="fileInput" accept=".docx,.xlsx,.md,.txt" hidden>
+                <div class="drop-zone-visual">📖📄</div>
+                <p class="drop-zone-title">拖拽文档至此，批量导入原文</p>
+                <p class="drop-zone-hint"><span class="file-tag">.docx</span><span class="file-tag">.xlsx</span><span class="file-tag">.md</span><span class="file-tag">.txt</span><span class="file-tag size-tag">单文件≤4MB</span></p>
+              </div>
+              <ul id="fileList" class="file-list hidden"></ul>
+              <div id="fileStatus" class="file-status hidden"></div>
+            </div>
+            <div class="source-right">
+              <button type="button" id="btnPasteClip" class="btn-paste-clip">
+                <span class="btn-paste-icon">📋</span>
+                <span>剪贴板<br>一键粘贴</span>
+              </button>
+            </div>
+          </div>
+          <p class="source-hint">💡 链接抓取与下方文本输入二选一，重复内容优先读取链接素材</p>
+        </div>
+      </details>
+
+      <!-- 📄 文本输入 -->
+      <details class="panel-group" open>
+        <summary><span class="panel-icon">📄</span> 文本输入 <span class="required">*</span> <span class="hint">（必填）</span></summary>
+        <div class="panel-group-body">
+          <div class="textarea-wrapper">
+            <textarea id="content" rows="10" placeholder="粘贴文章 / 书本片段 / 课程文稿…&#10;&#10;支持拖拽文档直接灌入文本"></textarea>
+            <button type="button" id="btnClearTextFloat" class="float-btn" title="一键清空">✕</button>
+            <button type="button" id="btnSaveDraft" class="float-btn float-btn-save" title="保存草稿">💾</button>
+          </div>
+          <div class="textarea-tools">
+            <span class="char-count" id="charCount">0 字</span>
+            <span class="char-limit">上限 5 万字 · 本地分析不限速</span>
+          </div>
+        </div>
+      </details>
+
+      <!-- ⚡ 执行区 -->
+      <div class="exec-bar">
+        <button type="button" id="btnTransform" class="btn-primary" disabled title="请先输入文本内容">
+          <span class="btn-icon">⚡</span><span class="btn-text">开始能力转化</span><span class="spinner hidden"></span>
+        </button>
+        <button type="button" id="btnResetAll" class="btn-reset" title="重置全部配置和输入">🔄 重置全部</button>
+        <button type="button" id="btnSaveTemplate" class="btn-save-template" title="保存当前配置为模板">💾 保存配置模板</button>
+      </div>
+    </section>
+
+    <!-- ===== 右侧：结果面板 ===== -->
+    <section class="panel panel-output">
+
+      <!-- 加载骨架 -->
+      <div id="loadingSkeleton" class="loading-skeleton hidden">
+        <div class="skeleton-line skeleton-line--long"></div>
+        <div class="skeleton-line skeleton-line--short"></div>
+        <div class="skeleton-line skeleton-line--medium"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line skeleton-line--short"></div>
+        <div class="skeleton-line"></div>
+      </div>
+
+      <!-- 结果区 -->
+      <div id="outputArea" class="output-area hidden">
+        <!-- 多模式 Tab 栏 -->
+        <div id="tabBar" class="tab-bar hidden"></div>
+        <!-- 搜索 -->
+        <div class="output-search hidden" id="outputSearch">
+          <input type="text" id="searchInput" placeholder="🔍 搜索关键词筛选论点…">
+        </div>
+        <!-- 标签栏：总结/提取/批判/练习 分栏切换 -->
+        <div id="outputTabs" class="output-tabs hidden">
+          <button class="out-tab active" data-outtab="all">全部</button>
+          <button class="out-tab" data-outtab="summarize">📋 总结重点</button>
+          <button class="out-tab" data-outtab="extract">🔍 提取信息</button>
+          <button class="out-tab" data-outtab="critique">💬 批判分析</button>
+          <button class="out-tab" data-outtab="capability">🧠 练习卡片</button>
+        </div>
+        <!-- 工具栏 -->
+        <div class="output-toolbar" id="outputToolbar">
+          <button class="toolbar-btn" id="btnCopyAll">📋 复制全部</button>
+          <div class="export-dropdown">
+            <button class="toolbar-btn toolbar-btn-primary" id="btnExport">📥 全量导出 ▾</button>
+            <div class="export-menu hidden" id="exportMenu">
+              <button data-format="word">📄 Word (.doc)</button>
+              <button data-format="md">📝 Markdown (.md)</button>
+              <button data-format="csv">📊 Excel CSV (.csv)</button>
+            </div>
+          </div>
+          <span class="toolbar-divider"></span>
+          <label class="toolbar-toggle hidden" id="toggleEvidence"><input type="checkbox" checked data-section="evidence"> 论据</label>
+          <label class="toolbar-toggle hidden" id="toggleFallacy"><input type="checkbox" checked data-section="fallacy"> 漏洞</label>
+          <label class="toolbar-toggle hidden" id="toggleCounter"><input type="checkbox" checked data-section="counter"> 反方</label>
+        </div>
+        <!-- 内容区 -->
+        <div id="outputContent" class="output-content"></div>
+      </div>
+
+      <!-- 角色扮演区（仅练习卡片模式） -->
+      <div id="actionArea" class="action-area hidden">
+        <div id="roleplaySection" class="hidden">
+          <details class="panel-group">
+            <summary>🎭 AI 场景带练</summary>
+            <div class="panel-group-body">
+              <p id="rpScenario" class="rp-scenario"></p>
+              <textarea id="userReply" rows="3" placeholder="请输入你的回复…"></textarea>
+              <button type="button" id="btnRoleplay" class="btn-primary btn-rp"><span class="btn-icon">💬</span><span class="btn-text">提交回复</span><span class="spinner hidden"></span></button>
+              <div id="rpResult" class="rp-result hidden"></div>
+            </div>
+          </details>
+        </div>
+        <!-- 反馈 -->
+        <div id="feedbackArea" class="feedback-area hidden">
+          <p class="feedback-question">这个转化结果对你有帮助吗？</p>
+          <div class="feedback-buttons">
+            <button class="btn-feedback" data-value="A">A. 非常有帮助</button>
+            <button class="btn-feedback" data-value="B">B. 有点帮助</button>
+            <button class="btn-feedback" data-value="C">C. 没感觉</button>
+            <button class="btn-feedback" data-value="D">D. 不如直接读文章</button>
+          </div>
+          <div id="feedbackThanks" class="feedback-thanks hidden"></div>
+        </div>
+      </div>
+
+      <!-- 空状态 -->
+      <div id="emptyState" class="empty-state">
+        <div class="empty-illustration">
+          <span class="illus-step">📖</span>
+          <span class="illus-arrow">→</span>
+          <span class="illus-step">🧩</span>
+          <span class="illus-arrow">→</span>
+          <span class="illus-step">📋</span>
+        </div>
+        <h2 class="empty-title">配置参数 + 粘贴素材，一键生成可落地练习卡片</h2>
+        <p class="empty-desc">基于 TextRank + TF-IDF 本地智能引擎，完整通读全量内容，分层提炼考点 + 自测题 + 场景演练</p>
+        <div class="empty-examples">
+          <button class="example-chip" data-sample="book">📖 导入一本书</button>
+          <button class="example-chip" data-sample="report">📊 粘贴行业报告</button>
+          <button class="example-chip" data-sample="course">📝 粘贴课程文稿</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 右侧悬浮工具栏 -->
+  <div class="floating-toolbar">
+    <button class="float-tool-btn" title="使用教程">📖</button>
+    <button class="float-tool-btn" title="常见FAQ">💬</button>
+    <button class="float-tool-btn" title="模板市场">🛒</button>
+    <button class="float-tool-btn" id="btnQrCode" title="分享二维码">📱</button>
+  </div>
+
+  <footer class="footer">
+    <p>Capable（可培）· 内容 → 能力转化引擎 · 离线版</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="script.js"></script>
+
+  <!-- QR Code 分享弹窗 -->
+  <div id="qrModal" class="qr-modal hidden">
+    <div class="qr-modal-backdrop"></div>
+    <div class="qr-modal-content">
+      <button class="qr-modal-close" aria-label="关闭">&times;</button>
+      <h3>📱 分享此页面</h3>
+      <img id="qrImage" src="" alt="QR Code" class="qr-image" width="200" height="200">
+      <p class="qr-url-text" id="qrUrlText"></p>
+      <button id="btnCopyUrl" class="btn-copy-url">📋 复制链接</button>
+    </div>
+  </div>
+</body>
+</html>
