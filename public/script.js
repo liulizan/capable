@@ -828,11 +828,8 @@ console.log('🧠 Capable v2 已就绪');
 
   $btnQrCode.addEventListener('click', () => {
     const url = window.location.href;
-    // 使用 qrcode-generator 本地生成，无需外部 API（避免国内网络问题）
-    const qr = qrcode(0, 'M');
-    qr.addData(url);
-    qr.make();
-    $qrImage.src = qr.createDataURL(5);
+    // 服务端生成二维码 PNG，零外部依赖
+    $qrImage.src = `/api/qrcode?url=${encodeURIComponent(url)}`;
     $qrUrlText.textContent = url;
     $qrModal.classList.remove('hidden');
   });

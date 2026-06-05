@@ -2336,6 +2336,33 @@ app.post('/api/roleplay', async (req, res) => {
   }
 });
 
+// ==================== QR Code 生成 ====================
+
+const QRCode = require('qrcode');
+
+/**
+ * GET /api/qrcode?url=xxx
+ * 服务端生成二维码 PNG，不依赖任何外部 CDN/API
+ */
+app.get('/api/qrcode', async (req, res) => {
+  try {
+    const url = req.query.url;
+    if (!url) return res.status(400).json({ error: '请提供 url 参数' });
+
+    const pngBuffer = await QRCode.toBuffer(url, {
+      width: 250,
+      margin: 2,
+      color: { dark: '#1e1b2e', light: '#ffffff' },
+    });
+
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.send(pngBuffer);
+  } catch (err) {
+    res.status(500).json({ error: '二维码生成失败' });
+  }
+});
+
 // ==================== 导出与启动 ====================
 
 // 导出 Express 应用（供 Vercel serverless 使用）
