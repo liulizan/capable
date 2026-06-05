@@ -828,7 +828,11 @@ console.log('🧠 Capable v2 已就绪');
 
   $btnQrCode.addEventListener('click', () => {
     const url = window.location.href;
-    $qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+    // 使用 qrcode-generator 本地生成，无需外部 API（避免国内网络问题）
+    const qr = qrcode(0, 'M');
+    qr.addData(url);
+    qr.make();
+    $qrImage.src = qr.createDataURL(5);
     $qrUrlText.textContent = url;
     $qrModal.classList.remove('hidden');
   });
