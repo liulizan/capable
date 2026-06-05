@@ -293,10 +293,7 @@
     <p>Capable（可培）· 内容 → 能力转化引擎 · 离线版</p>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="script.js"></script>
-
-  <!-- QR Code 分享弹窗 -->
+  <!-- QR Code 分享弹窗（必须在 script 之前，否则 DOM 未就绪） -->
   <div id="qrModal" class="qr-modal hidden">
     <div class="qr-modal-backdrop"></div>
     <div class="qr-modal-content">
@@ -307,5 +304,8 @@
       <button id="btnCopyUrl" class="btn-copy-url">📋 复制链接</button>
     </div>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

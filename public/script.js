@@ -815,44 +815,45 @@ $outputTabs.addEventListener('click', (e) => {
 console.log('🧠 Capable v2 已就绪');
 
 // ==================== QR Code 分享 ====================
-const $btnQrCode = document.getElementById('btnQrCode');
-const $qrModal = document.getElementById('qrModal');
-const $qrImage = document.getElementById('qrImage');
-const $qrUrlText = document.getElementById('qrUrlText');
-const $btnCopyUrl = document.getElementById('btnCopyUrl');
-const $qrModalClose = $qrModal.querySelector('.qr-modal-close');
-const $qrModalBackdrop = $qrModal.querySelector('.qr-modal-backdrop');
+(function initQrCode() {
+  const $btnQrCode = document.getElementById('btnQrCode');
+  const $qrModal = document.getElementById('qrModal');
+  if (!$btnQrCode || !$qrModal) return; // 元素缺失时静默跳过
 
-function openQrModal() {
-  const url = window.location.href;
-  $qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
-  $qrUrlText.textContent = url;
-  $qrModal.classList.remove('hidden');
-}
+  const $qrImage = document.getElementById('qrImage');
+  const $qrUrlText = document.getElementById('qrUrlText');
+  const $btnCopyUrl = document.getElementById('btnCopyUrl');
+  const $qrModalClose = $qrModal.querySelector('.qr-modal-close');
+  const $qrModalBackdrop = $qrModal.querySelector('.qr-modal-backdrop');
 
-function closeQrModal() {
-  $qrModal.classList.add('hidden');
-  $qrImage.src = '';
-}
+  $btnQrCode.addEventListener('click', () => {
+    const url = window.location.href;
+    $qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+    $qrUrlText.textContent = url;
+    $qrModal.classList.remove('hidden');
+  });
 
-$btnQrCode.addEventListener('click', openQrModal);
-$qrModalClose.addEventListener('click', closeQrModal);
-$qrModalBackdrop.addEventListener('click', closeQrModal);
-
-$btnCopyUrl.addEventListener('click', async () => {
-  try {
-    await navigator.clipboard.writeText(window.location.href);
-    showToast('✅ 链接已复制到剪贴板', 'success');
-  } catch {
-    // 降级方案
-    $qrUrlText.select();
-    document.execCommand('copy');
-    showToast('✅ 链接已复制到剪贴板', 'success');
+  function closeQrModal() {
+    $qrModal.classList.add('hidden');
+    $qrImage.src = '';
   }
-});
 
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && !$qrModal.classList.contains('hidden')) {
-    closeQrModal();
-  }
-});
+  $qrModalClose.addEventListener('click', closeQrModal);
+  $qrModalBackdrop.addEventListener('click', closeQrModal);
+
+  $btnCopyUrl.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      showToast('✅ 链接已复制到剪贴板', 'success');
+    } catch {
+      document.execCommand('copy');
+      showToast('✅ 链接已复制到剪贴板', 'success');
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !$qrModal.classList.contains('hidden')) {
+      closeQrModal();
+    }
+  });
+})();
